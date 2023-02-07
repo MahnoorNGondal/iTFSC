@@ -1,6 +1,11 @@
 # iTFSC
 integrated transcription factor analysis for single cell data (iTSC) is an R package designed to consolidate transcription factor (TF) information across multiple tools to arrive at a more robust list of TF. The package also allows users to do downstream visualization including differential expression analysis. The package will be validated using four different cancer types.  
 
+### Requirements
+In order to run this package you will need to install the following dependencies:
+library(SCENIC)
+library(BITFAM)
+library(Dorothea)
 
 Project selection:
 
