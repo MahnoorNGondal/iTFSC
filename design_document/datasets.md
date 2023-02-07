@@ -7,5 +7,8 @@
 - Lung cancer scRNA-seq data [66,309 cells]
 - Ovarian cancer scRNA-seq data [34,469 cells]
 
+The RDS file for these datasets can be downloaded from here: 
+- https://drive.google.com/drive/folders/1WL0TxDAQpPGzmGy8gltT-x-ezSw6Ndh1?ths=true
+
 Ideally processed data with raw counts
 This file will be provided by the users
