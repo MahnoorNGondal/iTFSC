@@ -13,9 +13,9 @@ Description: develop an integrated transcription factor analysis tool for single
 
 ### Features: the features tool will include the following features:
 
-integrated and fast TF analysis using 4-5 existing tools
-extract common TFs generated from all tools
-differential expression between cell types using limma on the output of the results from different tools
-GSEA on the results from differential expression analysis
-(if time) Apply the tools for bulk data (given there are at least 100 patients)
-(if time) use the transcription factors for the deconvolution of bulk data
+- integrated and fast TF analysis using 4-5 existing tools
+- extract common TFs generated from all tools
+- differential expression between cell types using limma on the output of the results from different tools
+- GSEA on the results from differential expression analysis
+- (if time) Apply the tools for bulk data (given there are at least 100 patients)
+- (if time) use the transcription factors for the deconvolution of bulk data
