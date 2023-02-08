@@ -19,3 +19,6 @@ Description: develop an integrated transcription factor analysis tool for single
 - GSEA on the results from differential expression analysis
 - (if time) Apply the tools for bulk data (given there are at least 100 patients)
 - (if time) use the transcription factors for the deconvolution of bulk data
+
+
+![Workflow](https://user-images.githubusercontent.com/89783694/217571498-99290176-6ca2-445d-9ff9-4564ad563b12.png)
