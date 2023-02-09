@@ -1,4 +1,4 @@
-TCGA matchmaker
+iTFSC
 - Activity 1: Set up GitHub repository
   - [X] Task 1.1: Set up GitHub repository
   - [X] Task 1.2: Create high-level description document
