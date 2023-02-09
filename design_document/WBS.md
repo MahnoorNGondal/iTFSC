@@ -24,9 +24,11 @@ iTFSC
        - [ ]  Task 2.3.1.1: The deliverable would be a a DE list with p values
     - [ ] Task 2.3.2: Perform GSEA
        - [ ]  Task 2.3.2.1: The deliverable would be a a GSEA - preferably with C2 pathways list with p values
-    - [ ] Task 2.3.2: Construct a robust rank list for the TFs
-       - [ ] Task 2.3.2.1: The first implementation would be to gather the list of TF across all output
-       - [ ] Task 2.3.2.2: The next step would be to score the TFs - with the TFs most common getting the highest score (we can also provide correlation methods). 
-       - [ ] Task 2.3.2.3: For visualization purposes log2 would be employed to better visualize the data alongside venn diagram   
+  - Activity 2.4: Novel ways to analysis the output from the TF functions
+    - [ ] Task 2.4.2: Construct a robust rank list for the TFs
+       - [ ] Task 2.4.2.1: The first implementation would be to gather the list of TF across all output
+       - [ ] Task 2.4.2.2: The next step would be to score the TFs - with the TFs most common getting the highest score (we can also provide correlation methods). 
+       - [ ] Task 2.4.2.3: For visualization purposes log2 would be employed to better visualize the data alongside venn diagram   
+  - Activity 2.5: Visualize the output comparisons
     - [ ] Task 2.3.3: The output would be available to the user as excel sheets and Rshiny output
 
