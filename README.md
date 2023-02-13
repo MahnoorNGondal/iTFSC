@@ -3,6 +3,8 @@ integrated transcription factor analysis for single cell data (iTSC) is an R pac
 
 ### Requirements
 In order to run this package you will need to install the following dependencies:
+please use R version 4.1.1
+
 - library(Seurat)
 - library(SeuratDisk)
 - library(SCENIC)
