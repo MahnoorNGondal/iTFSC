@@ -9,6 +9,14 @@ In order to run this package you will need to install the following dependencies
 - library(BITFAM)
 - library(Dorothea)
 - library(piano)
+- library(ggplot2)
+- library(dplyr)
+- library(tidyr)
+- library(AUCell)
+- library(RcisTarget)
+- library(GENIE3)
+
+If there is any issues install SCENIC, please visit this link for installation: http://htmlpreview.github.io/?https://github.com/aertslab/SCENIC/blob/master/inst/doc/SCENIC_Setup.html
 
 ### Project detail:
 
