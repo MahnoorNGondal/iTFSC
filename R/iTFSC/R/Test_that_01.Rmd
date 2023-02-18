@@ -1,0 +1,30 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+## reading in the libraries
+```{r}
+library(testthat)
+
+
+test_that(
+  "checking data normalization",
+  {
+    expect_equal(Normalization_check(Qian_merged_interest), "data is normalized, good please proceed")
+  }
+)
+
+test_that(
+  "Checking presence of raw counts",
+  {
+    expect_equal(Rawcount_check(Qian_merged_interest), "raw counts present, good please proceed")
+  }
+)
+```
+
+
+
