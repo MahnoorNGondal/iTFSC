@@ -9,6 +9,7 @@ editor_options:
 ## reading in the libraries
 ```{r}
 library(testthat)
+source("Pipeline_iTFSC_01.Rmd")
 
 
 test_that(
