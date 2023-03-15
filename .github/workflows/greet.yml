@@ -25,7 +25,7 @@ jobs:
       # a custom step that runs a couple shell commands
       - name: List
         run: |
-            echo "listing files in the bioinitio directory"
+            echo "listing files in the iTFSC directory"
             ls iTFSC
       # a custom step that runs R code
       - name: Greet
