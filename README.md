@@ -33,5 +33,19 @@ Description: develop an integrated transcription factor analysis tool for single
 - (if time) Apply the tools for bulk data (given there are at least 100 patients)
 - (if time) use the transcription factors for the deconvolution of bulk data
 
+### Example data
+The RDS file for these datasets can be downloaded from here:
+https://drive.google.com/drive/folders/1WL0TxDAQpPGzmGy8gltT-x-ezSw6Ndh1?ths=true
+
+How the user will run the example data:
+- Download the data from ### Example data
+The RDS file for these datasets can be downloaded from here:
+https://drive.google.com/drive/folders/1WL0TxDAQpPGzmGy8gltT-x-ezSw6Ndh1?ths=true
+- user can directly use the example data in the functions, no further processing is required is the data is already processed by standard seurat pipeline, please refer to this tutorial for converting your data into a standard seurat object: https://satijalab.org/seurat/articles/pbmc3k_tutorial.html
+
+Expected results:
+- a robust list of TF generated using three methods for extracting transcriptional activity score from single cell data
+- we will also provide a venn diagram to show how many common TFs exists
+- we will also employ heatmaps as depicted in the workflow image below to show individual methods output
 
 ![Workflow](https://user-images.githubusercontent.com/89783694/217571498-99290176-6ca2-445d-9ff9-4564ad563b12.png)
