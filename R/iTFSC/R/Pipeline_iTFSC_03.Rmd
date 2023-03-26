@@ -275,3 +275,133 @@ Runnin_Dorothea(Qian_merged_interest_downsample, CellType_updated,
               "/mctp/share/users/gondal/Classes/BIOINF576/Dorothea_activities_res_01_heatmap.png")
 ```
 
+##### Homework 3, running SCENIC pipeline ######################
+# Utilizing SCENIC package to infer transcriptic factor activity
+
+# Load libraries
+library(AUCell)
+library(GENIE3)
+library(SCENIC)
+library(Seurat)
+
+
+# Libraries for downstream visualizations
+# For some of the plots:
+#library(dplyr)
+library(KernSmooth)
+library(RColorBrewer)
+library(plotly)
+library(BiocParallel)
+library(grid)
+library(ComplexHeatmap)
+library(data.table)
+
+
+# humans
+org <- "hgnc"
+# change to your directory 
+dbDir <- "/Users/monicabonilla/Desktop/scenic_test/"
+
+# Subsetting the data , 100 cells per cell type . 
+# Read in Mahnoor's RDS file. This won't be needed if you run script from beginning.
+#Qian_merged_interest_downsample <- readRDS(Qian_merged_interest_downsample.RDS)
+
+merged_data_combined <- SetIdent(Qian_merged_interest_downsample, value = Qian_merged_interest_downsample@meta.data$cell_types )
+down.sampleMG <- subset(merged_data_combined,  downsample = 100)
+
+# save RDS to your machine 
+saveRDS(down.sampleMG, "/Users/Desktop/monicabonilla/scenic_test/down.sampleMG.RDS")
+
+########################
+
+exprMat <- as.matrix(down.sampleMG@assays$RNA@counts)
+dim(exprMat)
+
+cellInfo <- as.data.frame(down.sampleMG@meta.data$cell_types)
+cellInfo <- data.frame(seuratCluster=Idents(down.sampleMG))
+
+
+# run the rest of the pipeline now. 
+
+myDatasetTitle <- "data_comp_scenic"
+
+# Should be your directory 
+dbDir <- "/Users/monicabonilla/Desktop/scenic"
+data(defaultDbNames)
+dbs <- defaultDbNames[[org]]
+
+# download files online to your local computer/great lakes 
+data(list="motifAnnotations_hgnc_v9", package="RcisTarget")
+motifAnnotations_hgnc <- motifAnnotations_hgnc_v9
+
+scenicOptions <- initializeScenic(org=org, dbDir=dbDir, dbs=dbs, datasetTitle=myDatasetTitle, nCores=10)
+
+dim(scenicOptions)
+saveRDS(scenicOptions, file="int/scenicOptions.Rds")
+
+genesKept <- geneFiltering(exprMat, scenicOptions=scenicOptions,
+                           minCountsPerGene=3*.01*ncol(exprMat),
+                           minSamples=ncol(exprMat)*.01)
+
+exprMat_filtered <- exprMat[genesKept, ]
+
+runCorrelation(exprMat_filtered, scenicOptions)
+
+runGenie3(exprMat_filtered, scenicOptions)
+exprMat_filtered <- log2(exprMat_filtered+1)
+
+# Run GENIE3
+#runGenie3(exprMat_filtered, scenicOptions)
+
+scenicOptions@settings$verbose <- TRUE
+scenicOptions@settings$nCores <- 10
+scenicOptions@settings$seed <- 123
+
+saveRDS(scenicOptions, file="int/scenicOptions.Rds")
+
+scenicOptions <- runSCENIC_1_coexNetwork2modules(scenicOptions)
+scenicOptions <- runSCENIC_2_createRegulons(scenicOptions)
+scenicOptions <- runSCENIC_3_scoreCells(scenicOptions, exprMat_filtered)
+
+saveRDS(scenicOptions, file="int/scenicOptions.Rds") # To save statu
+
+### Run SCENIC pipeline on cluster###########
+
+
+scenicOptions <- readRDS("/Users/monicabonilla/Desktop/scenic/scenicOptions.Rds")
+
+regulonAUC <- loadInt(scenicOptions, "aucell_regulonAUC")
+
+regulonAUC <- regulonAUC[onlyNonDuplicatedExtended(rownames(regulonAUC)),]
+regulonActivity_byCellType <- sapply(split(rownames(cellInfo), cellInfo$seuratCluster),
+                                     function(cells) rowMeans(getAUC(regulonAUC)[,cells]))
+regulonActivity_byCellType_Scaled <- t(scale(t(regulonActivity_byCellType), center = T, scale=T))
+selectedResolution <- "0" # select resolution
+
+# save visualization files to a directory 
+png(file="/Users/monicabonilla/Desktop/scenic/scenic.png", width=1000, height=4000)
+ComplexHeatmap::Heatmap(regulonActivity_byCellType_Scaled, name="Regulon activity")
+dev.off()
+
+regulonActivity_byCellType_Scaled_df <- as.data.frame(regulonActivity_byCellType_Scaled)
+regulonActivity_byCellType_Scaled_df$gene <- rownames(regulonActivity_byCellType_Scaled_df)
+SREBF2 <- filter(regulonActivity_byCellType_Scaled_df, gene == "SREBF2 (99g)")
+
+SREBF2$gene <- NULL
+png(file="/Users/monicabonilla/Desktop/scenic/scenic_SRB.png", width=1000, height=500)
+ComplexHeatmap::Heatmap(SREBF2, name="Regulon activity")
+dev.off()
+
+
+# Split the cells by cluster:
+cellsPerCluster <- split(rownames(cellClusters), cellClusters[,selectedResolution]) 
+regulonAUC <- regulonAUC[onlyNonDuplicatedExtended(rownames(regulonAUC)),]
+# Calculate average expression:
+regulonActivity_byCellType <- sapply(cellsPerCluster,
+                                     function(cells) rowMeans(getAUC(regulonAUC)[,cells]))
+# Scale expression:
+regulonActivity_byCellType_Scaled <- t(scale(t(regulonActivity_byCellType), center = T, scale=T))
+
+
+
+
