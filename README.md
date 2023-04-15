@@ -38,7 +38,7 @@ The RDS file for these datasets can be downloaded from here:
 https://drive.google.com/drive/folders/1WL0TxDAQpPGzmGy8gltT-x-ezSw6Ndh1?ths=true
 
 How the user will run the example data:
-- Download the data from ### Example data
+- Download the data from ### Example data (link is above)
 The RDS file for these datasets can be downloaded from here:
 https://drive.google.com/drive/folders/1WL0TxDAQpPGzmGy8gltT-x-ezSw6Ndh1?ths=true
 - user can directly use the example data in the functions, no further processing is required is the data is already processed by standard seurat pipeline, please refer to this tutorial for converting your data into a standard seurat object: https://satijalab.org/seurat/articles/pbmc3k_tutorial.html
