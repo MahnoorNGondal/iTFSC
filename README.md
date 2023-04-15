@@ -17,6 +17,13 @@ In order to run this package you will need to install the following dependencies
 - library(AUCell)
 - library(RcisTarget)
 - library(GENIE3)
+- library(base)
+- library(tibble)
+- library(ComplexHeatmap)
+- library(ggVennDiagram)
+- library(reshape2)
+- library(piano)
+- library(ggpubr)
 
 If there is any issues install SCENIC, please visit this link for installation: http://htmlpreview.github.io/?https://github.com/aertslab/SCENIC/blob/master/inst/doc/SCENIC_Setup.html
 
