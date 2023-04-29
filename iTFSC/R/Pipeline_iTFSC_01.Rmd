@@ -1,0 +1,216 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+## reading in the libraries
+```{r}
+library(Seurat)
+library(SeuratDisk)
+library(SCENIC)
+library(BITFAM)
+library(Dorothea)
+library(piano)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(AUCell)
+library(RcisTarget)
+library(GENIE3)
+library(base)
+```
+
+## Reading the scRNA-seq data
+```{r}
+
+#' this is case studies data - you can download this RDS file on your local machine using this url: https://drive.google.com/drive/folders/1WL0TxDAQpPGzmGy8gltT-x-ezSw6Ndh1?ths=true
+#' please update the path to match your directory
+#' 
+Qian_merged <- readRDS("/mctp/share/users/gondal/DC_Jenny/03_output/Lung_Breast_Colon_Qian/version_01_02_06_23/Qian_merged.RDS")
+```
+
+## Select the tissue (using existing case study)
+```{r}
+#' Selecting tissue
+#' 
+#' @description
+#' allows the user to select the tissue of interest from the case studies.
+#'
+#' @details
+#' We have provided 4 case studies for this package. 
+#' Users can choose to employ the case studies of their choice or use their own data
+#' In this function, users can choose which case study they want to work on
+#' The case studies include: lung cancer 2 -> breast cancer 3 -> ovarian cancer 4 -> colon cancer
+#' 
+#' @param in
+#' this requires a seurat object, for which the data can be downloaded from here: https://drive.google.com/drive/folders/1WL0TxDAQpPGzmGy8gltT-x-ezSw6Ndh1?ths=true
+#' 
+#' @param out
+#' this will return the seurat object containing the case study of interest from the four provided
+#' 
+Tissue_selection <- function(seurat_obj) {
+  
+  # asking users to select the case study of interest, please enter the number corresponding to the case study of interest
+  tissue_name <- readline(prompt = paste("Enter the tissue of interest from; 1 -> lung cancer 2 -> breast cancer 3 -> ovarian cancer 4 -> colon cancer: "))
+  if (tissue_name == 1)
+    seurat_subset <- subset(seurat_obj, subset = TumorType_detail == "Lung_Cancer")
+  
+  if (tissue_name == 2)
+    seurat_subset <- subset(seurat_obj, subset = TumorType_detail == "Breast_Cancer")
+  
+  if (tissue_name == 3)
+    seurat_subset <- subset(seurat_obj, subset = TumorType_detail == "Ovarian_Cancer")
+  
+  if (tissue_name == 4)
+    seurat_subset <- subset(seurat_obj, subset = TumorType_detail == "Colorectal_Cancer")         
+    
+    return (seurat_subset)
+}
+Qian_merged_interest <- Tissue_selection(Qian_merged)
+
+#Qian_merged_interest@assays$RNA@data <- Qian_merged_interest@assays$RNA@counts
+```
+
+## Performing data QC
+```{r}
+#' Perfroming data quality control on normalized data slot
+#' 
+#' @description
+#' to run the subsequent functions, we need to know if the seurat data contains normalized counts in the right location
+#'
+#' @details
+#' this function makes a 200 by 200 matrix of normalized counts and converts the matrix into a dataframe
+#' the values are then checked if they are decimal or integer to check if normalized counts are present
+#' 
+#' @param in
+#' this requires a seurat object 
+#' 
+#' @param out
+#' it will tell the user is the normalized data is present and in the right location
+#' 
+#' 
+Normalization_check <- function(seurat_obj) {
+  
+  seurat_obj_data_slot <- seurat_obj@assays$RNA@data[1:200, 1:200]   
+  
+  seurat_obj_data_slot <- as.data.frame(summary(seurat_obj_data_slot))
+    
+  if (any(round(seurat_obj_data_slot$x) != seurat_obj_data_slot$x) == TRUE)
+#  print("data is normalized, good please proceed")  
+  return ("data is normalized, good please proceed")
+  
+  if (any(round(seurat_obj_data_slot$x) != seurat_obj_data_slot$x) == FALSE)
+#  print("data is not normalized please normalize data first")  
+  return ("data is not normalized please normalize data first")
+}
+
+Normalization_check(Qian_merged_interest)
+
+#' Perfroming data quality control on raw data slot
+#' 
+#' @description
+#' to run the subsequent functions, we need to know if the seurat data contains raw counts in the right location
+#'
+#' @details
+#' this function makes a 200 by 200 matrix of raw counts and converts the matrix into a dataframe
+#' the values are then checked if they are decimal or integer to check if raw counts are present
+#' 
+#' @param in
+#' this requires a seurat object 
+#' 
+#' @param out
+#' it will tell the user is the raw counts is present and in the right location
+#' 
+#' 
+
+Rawcount_check <- function(seurat_obj) {
+  
+  seurat_obj_counts_slot <- seurat_obj@assays$RNA@counts[1:200, 1:200]   
+  
+  seurat_obj_counts_slot <- as.data.frame(summary(seurat_obj_counts_slot))
+    
+  if (any(round(seurat_obj_counts_slot$x) != seurat_obj_counts_slot$x) == TRUE)
+ # print("raw counts not present, please provide raw counts for accurate analysis")
+  return ("raw counts not present, please provide raw counts for accurate analysis")
+  
+  if (any(round(seurat_obj_counts_slot$x) != seurat_obj_counts_slot$x) == FALSE)
+ # print("raw counts present, good please proceed")  
+  return ("raw counts present, good please proceed")
+
+}
+
+Rawcount_check(Qian_merged_interest)
+```
+
+
+## Downsample seurat object (this would work with existing case study or new data)
+```{r}
+
+#' Downsampling the data
+#' 
+#' @description
+#' single-cell objects are usually very large to handle especially for testing purposes therefore this function will downsample the data to an ident users is most interested in 
+#'
+#' @details
+#' this function will ask the user for the ident of interest and the number of cells they want each ident to contain
+#' 
+#' @param in
+#' this requires a seurat object, ident name and number of cells to downsample
+#' 
+#' @param out
+#' it will output the downsampled seurat object
+#' 
+#' 
+
+Down_sample <- function(seurat_obj, ident_name, cell_count) {
+  
+  seurat_obj <- SetIdent(seurat_obj, value = ident_name)
+  
+  down.sample <- subset(seurat_obj,  downsample = cell_count)    
+    
+  return (down.sample)
+}
+
+Qian_merged_interest_downsample <- Down_sample(Qian_merged_interest, "CellType_updated", 2)
+```
+
+
+# BITFAM
+```{r}
+
+#' Running BITFAM
+#' 
+#' @description
+#' BITFAM [PMID: 34193535] is one of the methods that we want to implement for this tool and it estimates the activity of the transcription factor from single-cell data
+#'
+#' @details
+#' this function will use the downsampled object (since it takes a long time to run ~ 2hours) and run BITFAM on it 
+#' 
+#' @param in
+#' this requires a seurat object, and path to save results
+#' 
+#' @param out
+#' it will output a matrix file computed for the activity of each TF in each cell 
+#'
+#'
+Runnin_BITFAM <- function(seurat_obj, path_to_save_res) {
+  
+  print("The time for running this code depends on how many cells users decieded to downsample on in the previous function, for testing purposes, I would recommend a very small number eg 2-5 - it might still take 30-45 mins") 
+  
+  seurat_obj_counts <- GetAssayData(seurat_obj, slot = "counts", assay = "RNA")
+  
+  data_matrix_normalized <- BITFAM_preprocess(raw_data = seurat_obj_counts)
+  
+  BITFAM_res <- BITFAM(data = data_matrix_normalized, species = "human", scATAC_obj = NA, ncores = parallel::detectCores())
+
+  BITFAM_activities_res <- BITFAM_activities(BITFAM_res)
+  
+  write.csv(BITFAM_activities_res, path_to_save_res, row.names = TRUE)
+
+}
+
+Runnin_BITFAM(Qian_merged_interest_downsample, "/mctp/share/users/gondal/Classes/BIOINF576/BITFAM_activities_res_01.csv")
+```

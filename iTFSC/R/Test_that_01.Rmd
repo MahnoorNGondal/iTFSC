@@ -1,0 +1,83 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+## reading in the libraries
+```{r}
+library(testthat)
+source("Pipeline_iTFSC_01.Rmd")
+
+
+test_that(
+  "checking data normalization",
+  {
+    expect_equal(Normalization_check(Qian_merged_interest), "data is normalized, good please proceed")
+  }
+)
+
+test_that(
+  "Checking presence of raw counts",
+  {
+    expect_equal(Rawcount_check(Qian_merged_interest), "raw counts present, good please proceed")
+  }
+)
+```
+
+
+## quality checks
+# using this tutorial for quality controls: https://nbisweden.github.io/workshop-scRNAseq/labs/compiled/seurat/seurat_01_qc.html
+```{r}
+# replace alldata with your seurat object
+feats <- c("nFeature_RNA", "nCount_RNA", "percent_mito", "percent_ribo", "percent_hb")
+VlnPlot(Qian_merged_interest, group.by = "orig.ident", features = feats, pt.size = 0.1, ncol = 3) +
+    NoLegend()
+    
+FeatureScatter(alldata, "nCount_RNA", "nFeature_RNA", group.by = "orig.ident", pt.size = 0.5)
+
+# Detection-based filtering
+selected_c <- WhichCells(alldata, expression = nFeature_RNA > 200)
+selected_f <- rownames(alldata)[Matrix::rowSums(alldata) > 3]
+
+data.filt <- subset(alldata, features = selected_f, cells = selected_c)
+dim(data.filt)
+
+# Mito/Ribo filtering
+selected_mito <- WhichCells(data.filt, expression = percent_mito < 0.2)
+selected_ribo <- WhichCells(data.filt, expression = percent_ribo > 0.05)
+
+# and subset the object to only keep those cells
+data.filt <- subset(data.filt, cells = selected_mito)
+data.filt <- subset(data.filt, cells = selected_ribo)
+
+dim(data.filt)
+
+table(data.filt$orig.ident)
+
+# Plot filtered QC
+feats <- c("nFeature_RNA", "nCount_RNA", "percent_mito", "percent_ribo", "percent_hb")
+
+VlnPlot(data.filt, group.by = "orig.ident", features = feats, pt.size = 0.1, ncol = 3) +
+    NoLegend()
+    
+    
+dim(data.filt)
+
+# Filter genes
+# Filter MALAT1
+data.filt <- data.filt[!grepl("MALAT1", rownames(data.filt)), ]
+
+# Filter Mitocondrial
+data.filt <- data.filt[!grepl("^MT-", rownames(data.filt)), ]
+
+# Filter Ribossomal gene (optional if that is a problem on your data) data.filt
+# <- data.filt[ ! grepl('^RP[SL]', rownames(data.filt)), ]
+
+# Filter Hemoglobin gene (optional if that is a problem on your data)
+data.filt <- data.filt[!grepl("^HB[^(P)]", rownames(data.filt)), ]
+
+dim(data.filt)
+```
